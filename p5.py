@@ -6,7 +6,6 @@ import threading
 import RPi.GPIO as GPIO
 import adafruit_mcp3xxx.mcp3008 as MCP
 from adafruit_mcp3xxx.analog_in import AnalogIn
-
 ldr_chan = None
 temp_chan = None
 sample_btn = 17
@@ -53,41 +52,38 @@ def btn_press(channel):
     print("Sample rate will change to {}s".format(sample_rate))
 
 def setup():
-
     global ldr_chan
     global temp_chan
-
     # create the spi bus
-    spi = busio.SPI( clock = board.SCK, MISO = board.MISO, MOSI = board.MOSI )
-
+    spi = busio.SPI( clock = board.SCK, MISO = board.MISO, MOSI =
+    board.MOSI )
     # create the cs (chip select)
     cs = digitalio.DigitalInOut(board.D5)
-
     # create the mcp object
     mcp = MCP.MCP3008( spi, cs )
-
     # create analog input channels on pins 0 and 1
-    ldr_chan = AnalogIn( mcp, MCP.P2)
-    temp_chan = AnalogIn( mcp, MCP.P0)
-
+    ldr_chan = AnalogIn( mcp, MCP.P0)
+    temp_chan = AnalogIn( mcp, MCP.P1)
     # setup sample rate button
     GPIO.setup(sample_btn, GPIO.IN)
     GPIO.setup(sample_btn, GPIO.IN, pull_up_down=GPIO.PUD_UP)
-    GPIO.add_event_detect(sample_btn, GPIO.FALLING, callback=btn_press, bouncetime=400)
+    GPIO.add_event_detect(sample_btn, GPIO.FALLING,
+    callback=btn_press_handler, bouncetime=400)
 
 
 
 if __name__ == "__main__":
     try:
-        setup()
-        timer = time.time() #start the timer
-        # to_print = ["Runtime","       ","Temp Reading","       ","Temp","       ","Light Reading"]
+        setup() 
+        timer = time.time()
+        #start the timer
+        # to_print = ["Runtime"," ","Temp Reading","","Temp"," ","Light Reading"]
         # print(*to_print)
         print("{:<20} {:<20} {:<20} {:<20}".format("Runtime","Temp Reading","Temp","Light Reading"))
         temp_ldr_thread()
         while True:
             pass
-    except Exception as e:
-        print(e)
-    finally:
-        GPIO.cleanup()
+        except Exception as e:
+            print(e)
+        finally:
+            GPIO.cleanup()
